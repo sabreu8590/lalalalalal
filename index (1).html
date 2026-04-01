@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shorts Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0c0e14;
+  --surface: #141729;
+  --border: #1a1d2e;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --text-muted: #475569;
+  --text-faint: #334155;
+  --accent: #6366f1;
+  --accent-light: #a78bfa;
+  --green: #22c55e;
+  --red: #f87171;
+  --gold: #FFD700;
+  --silver: #C0C0C0;
+  --bronze: #CD7F32;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.header {
+  padding: 28px 28px 0;
+  border-bottom: 1px solid var(--border);
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.title {
+  font-family: 'Space Mono', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-family: 'Space Mono', monospace;
+  margin-top: 4px;
+}
+.header-actions { display: flex; gap: 8px; }
+
+.btn {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { filter: brightness(1.1); }
+.btn:disabled { opacity: 0.5; cursor: default; filter: none; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-accent { background: var(--green); color: var(--bg); }
+.btn-ghost {
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 17px;
+  padding: 9px 13px;
+}
+.btn-danger {
+  background: #2d1215;
+  color: var(--red);
+  font-size: 11px;
+  padding: 6px 12px;
+}
+
+.settings-panel {
+  padding: 14px 0 18px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  display: none;
+}
+.settings-panel.open { display: block; }
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+.hint a { color: var(--accent-light); }
+
+.input-row, .add-row { display: flex; gap: 8px; }
+.add-row { margin-bottom: 18px; }
+input[type="text"], input[type="password"] {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 14px;
+  outline: none;
+  min-width: 0;
+  flex: 1;
+  transition: border-color 0.15s;
+}
+input:focus { border-color: var(--accent); }
+
+.tabs { display: flex; gap: 2px; }
+.tab {
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--text-dim); }
+.tab.active {
+  color: var(--accent-light);
+  border-bottom-color: var(--accent);
+}
+
+.status {
+  margin: 14px 28px 0;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+}
+.status.visible { display: flex; }
+.status.error { background: #2d1215; color: var(--red); border: 1px solid #451a1e; }
+.status.info { background: #0f1a2e; color: #60a5fa; border: 1px solid #1e2d4a; }
+.dismiss-btn {
+  background: none; border: none; color: inherit;
+  font-size: 18px; cursor: pointer; padding: 0 0 0 12px; opacity: 0.6;
+}
+
+.data-note {
+  margin: 12px 28px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #1a1520;
+  border: 1px solid #2a2035;
+  font-size: 12px;
+  color: var(--accent-light);
+  font-family: 'Space Mono', monospace;
+  line-height: 1.5;
+}
+.data-note strong { color: var(--text); }
+
+.leaderboard { padding: 10px 28px 28px; }
+
+.col-headers {
+  display: grid;
+  grid-template-columns: 48px 1fr 68px 120px 40px;
+  align-items: center;
+  padding: 14px 14px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: 'Space Mono', monospace;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.col-stat, .col-views { text-align: right; }
+
+.row {
+  display: grid;
+  grid-template-columns: 48px 1fr 68px 120px 40px;
+  align-items: center;
+  padding: 11px 14px;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeSlideIn 0.3s ease both;
+  transition: background 0.15s;
+}
+.row:hover { background: rgba(99, 102, 241, 0.04); }
+
+.row-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  border-radius: 10px;
+  pointer-events: none;
+  transition: width 0.5s ease;
+}
+
+.rank-col { position: relative; z-index: 1; }
+.rank-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; font-weight: 700;
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+}
+.rank-badge.gold   { background: var(--gold);   color: #1a1a1a; }
+.rank-badge.silver { background: var(--silver); color: #1a1a1a; }
+.rank-badge.bronze { background: var(--bronze); color: #1a1a1a; }
+.rank-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px; font-weight: 600;
+  color: var(--text-muted); padding-left: 6px;
+}
+
+.channel-col {
+  display: flex; align-items: center; gap: 10px;
+  position: relative; z-index: 1; overflow: hidden;
+}
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  object-fit: cover; flex-shrink: 0; border: 2px solid var(--border);
+}
+.avatar-placeholder {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--border); display: flex; align-items: center;
+  justify-content: center; font-size: 14px; font-weight: 700;
+  color: var(--text-muted); flex-shrink: 0;
+}
+.channel-name {
+  font-size: 14px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.stat-col {
+  text-align: right; position: relative; z-index: 1;
+  font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text-muted);
+}
+
+.views-col { text-align: right; position: relative; z-index: 1; }
+.views-num { font-family: 'Space Mono', monospace; font-size: 17px; font-weight: 700; }
+.views-delta {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  color: var(--text-muted); display: block; margin-top: 1px;
+}
+
+.action-col { text-align: right; position: relative; z-index: 1; }
+.remove-btn {
+  background: none; border: none; color: var(--text-faint);
+  font-size: 18px; cursor: pointer; padding: 4px 8px;
+  border-radius: 4px; transition: color 0.15s;
+}
+.remove-btn:hover { color: var(--red); }
+
+.empty { text-align: center; padding: 72px 24px; }
+.empty-icon { font-size: 44px; margin-bottom: 10px; }
+.empty-title { font-size: 18px; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; }
+.empty-hint {
+  font-size: 14px; color: var(--text-muted);
+  max-width: 420px; margin: 0 auto; line-height: 1.5;
+}
+
+.snapshot-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text-faint);
+  padding: 8px 28px;
+  text-align: center;
+}
+
+.footer {
+  padding: 18px 28px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-faint);
+  font-family: 'Space Mono', monospace;
+}
+
+.settings-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-top">
+    <div>
+      <div class="title">SHORTS TRACKER</div>
+      <div class="subtitle" id="subtitle">0 channels tracked</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="toggleSettings()" title="Settings">⚙</button>
+      <button class="btn btn-primary" id="refreshBtn" onclick="refreshAll()" disabled>↻ Refresh All</button>
+    </div>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="label">YouTube Data API Key</div>
+    <div class="input-row">
+      <input type="password" id="apiKeyInput" placeholder="AIzaSy..." onkeydown="if(event.key==='Enter')saveApiKey()">
+      <button class="btn btn-primary" onclick="saveApiKey()">Save</button>
+    </div>
+    <p class="hint">
+      Free key from <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank">console.cloud.google.com</a>
+      → Enable YouTube Data API v3 → Credentials → Create API Key
+    </p>
+    <div class="settings-section">
+      <div class="label">Data Management</div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn btn-ghost" onclick="exportData()" style="font-size:12px;">Export Data (JSON)</button>
+        <button class="btn btn-danger" onclick="resetAll()">Reset All Data</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="add-row">
+    <input type="text" id="channelInput" placeholder="Paste channel URL or @handle..." onkeydown="if(event.key==='Enter')addChannel()">
+    <button class="btn btn-accent" id="addBtn" onclick="addChannel()">+ Add</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab" data-hours="24" onclick="setTimePeriod(24, this)">24h</button>
+    <button class="tab active" data-hours="168" onclick="setTimePeriod(168, this)">7 days</button>
+    <button class="tab" data-hours="336" onclick="setTimePeriod(336, this)">14 days</button>
+    <button class="tab" data-hours="672" onclick="setTimePeriod(672, this)">28 days</button>
+  </div>
+</header>
+
+<div class="status" id="statusBar">
+  <span id="statusText"></span>
+  <button class="dismiss-btn" onclick="hideStatus()">×</button>
+</div>
+
+<div id="dataNote"></div>
+<div class="leaderboard" id="leaderboard"></div>
+<div class="snapshot-count" id="snapshotInfo"></div>
+
+<footer class="footer">
+  Refresh daily to build history · Views = Shorts only (≤60s) · Each refresh creates a new snapshot
+</footer>
+
+<script>
+// ── State ───────────────────────────────────────────
+const STORAGE_KEY = "yt-shorts-tracker-v3";
+const API_KEY_KEY = "yt-shorts-api-key";
+
+// Data structure:
+// state.channels = { channelId: { title, thumbnail } }
+// state.snapshots = [ { timestamp, channelId, videoId, viewCount }, ... ]
+let state = { channels: {}, snapshots: [] };
+let apiKey = "";
+let timePeriodHours = 168; // 7 days default
+
+// ── Init ────────────────────────────────────────────
+(function init() {
+  apiKey = localStorage.getItem(API_KEY_KEY) || "";
+  document.getElementById("apiKeyInput").value = apiKey;
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Migration from v2 format
+      if (parsed.snapshots && !Array.isArray(parsed.snapshots)) {
+        state = migrateV2(parsed);
+      } else {
+        state = parsed;
+      }
+    }
+  } catch(e) { console.error("Load error:", e); }
+  render();
+})();
+
+function migrateV2(old) {
+  const newState = { channels: old.channels || {}, snapshots: [] };
+  for (const [channelId, videos] of Object.entries(old.snapshots || {})) {
+    for (const [videoId, dates] of Object.entries(videos)) {
+      for (const [date, viewCount] of Object.entries(dates)) {
+        newState.snapshots.push({
+          timestamp: new Date(date + "T12:00:00Z").getTime(),
+          channelId, videoId, viewCount
+        });
+      }
+    }
+  }
+  return newState;
+}
+
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {
+    console.error("Save error:", e);
+    showStatus("Storage full — try exporting data and clearing old snapshots", "error");
+  }
+}
+
+// ── Helpers ─────────────────────────────────────────
+function formatViews(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,"") + "M";
+  if (n >= 1e3) return (n/1e3).toFixed(1).replace(/\.0$/,"") + "K";
+  return String(n);
+}
+function parseDuration(iso) {
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return 0;
+  return (parseInt(m[1]||0)*3600) + (parseInt(m[2]||0)*60) + parseInt(m[3]||0);
+}
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return mins + "m ago";
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + "h ago";
+  const days = Math.floor(hrs / 24);
+  return days + "d ago";
+}
+
+// ── Status bar ──────────────────────────────────────
+function showStatus(msg, type) {
+  const bar = document.getElementById("statusBar");
+  const text = document.getElementById("statusText");
+  bar.className = "status visible " + type;
+  text.textContent = msg;
+}
+function hideStatus() {
+  document.getElementById("statusBar").className = "status";
+}
+
+// ── Settings ────────────────────────────────────────
+function toggleSettings() {
+  document.getElementById("settingsPanel").classList.toggle("open");
+}
+function saveApiKey() {
+  apiKey = document.getElementById("apiKeyInput").value.trim();
+  localStorage.setItem(API_KEY_KEY, apiKey);
+  document.getElementById("settingsPanel").classList.remove("open");
+  showStatus("API key saved", "info");
+  setTimeout(hideStatus, 2000);
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "shorts-tracker-export-" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+}
+function resetAll() {
+  if (!confirm("Delete all tracked channels and snapshot history? This cannot be undone.")) return;
+  state = { channels: {}, snapshots: [] };
+  persist();
+  render();
+  showStatus("All data cleared", "info");
+  setTimeout(hideStatus, 2000);
+}
+
+// ── Time period ─────────────────────────────────────
+function setTimePeriod(hours, btn) {
+  timePeriodHours = hours;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ── YouTube API ─────────────────────────────────────
+const YT = "https://www.googleapis.com/youtube/v3";
+
+async function ytFetch(endpoint, params) {
+  const url = new URL(`${YT}/${endpoint}`);
+  params.key = apiKey;
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err?.error?.message || `API error ${res.status}`);
+  }
+  return res.json();
+}
+
+async function resolveChannelId(input) {
+  input = input.trim();
+  const atMatch = input.match(/@([\w.-]+)/);
+  if (atMatch) {
+    const data = await ytFetch("channels", { part:"id", forHandle: atMatch[1] });
+    if (data.items?.length) return data.items[0].id;
+    const s = await ytFetch("search", { part:"snippet", q:atMatch[1], type:"channel", maxResults:"1" });
+    if (s.items?.length) return s.items[0].snippet.channelId;
+    throw new Error("Channel not found: " + input);
+  }
+  const chMatch = input.match(/channel\/(UC[\w-]+)/);
+  if (chMatch) return chMatch[1];
+  if (/^UC[\w-]{22}$/.test(input)) return input;
+  const cMatch = input.match(/\/(c|user)\/([\w.-]+)/);
+  const name = cMatch ? cMatch[2] : input.replace(/^https?:\/\/(www\.)?youtube\.com\/?/, "").replace(/\//g,"");
+  if (name) {
+    const s = await ytFetch("search", { part:"snippet", q:name, type:"channel", maxResults:"1" });
+    if (s.items?.length) return s.items[0].snippet.channelId;
+  }
+  throw new Error("Could not resolve: " + input);
+}
+
+async function getChannelInfo(channelId) {
+  const data = await ytFetch("channels", { part:"snippet,contentDetails", id:channelId });
+  if (!data.items?.length) throw new Error("Channel not found");
+  const ch = data.items[0];
+  return {
+    id: ch.id,
+    title: ch.snippet.title,
+    thumbnail: ch.snippet.thumbnails?.default?.url || "",
+    uploadsPlaylistId: ch.contentDetails?.relatedPlaylists?.uploads,
+  };
+}
+
+async function getRecentVideos(playlistId, maxPages) {
+  let videos = [], pageToken = "";
+  for (let i = 0; i < maxPages; i++) {
+    const params = { part:"snippet", playlistId, maxResults:"50" };
+    if (pageToken) params.pageToken = pageToken;
+    const data = await ytFetch("playlistItems", params);
+    videos = videos.concat(data.items.map(it => ({
+      id: it.snippet.resourceId.videoId,
+      title: it.snippet.title,
+    })));
+    pageToken = data.nextPageToken;
+    if (!pageToken) break;
+  }
+  return videos;
+}
+
+async function getVideoDetails(videoIds) {
+  const results = {};
+  for (let i = 0; i < videoIds.length; i += 50) {
+    const batch = videoIds.slice(i, i+50);
+    const data = await ytFetch("videos", { part:"contentDetails,statistics", id:batch.join(",") });
+    for (const item of (data.items || [])) {
+      const dur = parseDuration(item.contentDetails.duration);
+      results[item.id] = {
+        duration: dur,
+        isShort: dur > 0 && dur <= 60,
+        viewCount: parseInt(item.statistics.viewCount || "0"),
+      };
+    }
+  }
+  return results;
+}
+
+// ── Take snapshot for a channel ─────────────────────
+async function snapshotChannel(channelId) {
+  const uploadsId = "UU" + channelId.slice(2);
+  const videos = await getRecentVideos(uploadsId, 3);
+  const details = await getVideoDetails(videos.map(v => v.id));
+  const now = Date.now();
+  let count = 0;
+
+  for (const video of videos) {
+    const d = details[video.id];
+    if (d?.isShort) {
+      count++;
+      state.snapshots.push({
+        timestamp: now,
+        channelId,
+        videoId: video.id,
+        viewCount: d.viewCount,
+      });
+    }
+  }
+  return count;
+}
+
+// ── Add channel ─────────────────────────────────────
+async function addChannel() {
+  if (!apiKey) { showStatus("Add your YouTube API key first (⚙ icon)", "error"); toggleSettings(); return; }
+  const input = document.getElementById("channelInput").value.trim();
+  if (!input) return;
+
+  document.getElementById("addBtn").disabled = true;
+  document.getElementById("addBtn").textContent = "Adding...";
+  hideStatus();
+
+  try {
+    showStatus("Resolving channel...", "info");
+    const channelId = await resolveChannelId(input);
+
+    if (state.channels[channelId]) {
+      showStatus("Channel already added", "error");
+      document.getElementById("addBtn").disabled = false;
+      document.getElementById("addBtn").textContent = "+ Add";
+      return;
+    }
+
+    showStatus("Fetching channel info...", "info");
+    const info = await getChannelInfo(channelId);
+    state.channels[channelId] = { title: info.title, thumbnail: info.thumbnail };
+
+    showStatus("Snapshotting Shorts views...", "info");
+    const count = await snapshotChannel(channelId);
+
+    persist();
+    render();
+    document.getElementById("channelInput").value = "";
+    showStatus(`Added ${info.title} — ${count} Shorts tracked`, "info");
+    setTimeout(hideStatus, 3000);
+  } catch(e) {
+    showStatus(e.message, "error");
+  }
+
+  document.getElementById("addBtn").disabled = false;
+  document.getElementById("addBtn").textContent = "+ Add";
+}
+
+// ── Remove channel ──────────────────────────────────
+function removeChannel(channelId) {
+  delete state.channels[channelId];
+  state.snapshots = state.snapshots.filter(s => s.channelId !== channelId);
+  persist();
+  render();
+}
+
+// ── Refresh all ─────────────────────────────────────
+async function refreshAll() {
+  if (!apiKey) { showStatus("Add your YouTube API key first", "error"); toggleSettings(); return; }
+  const ids = Object.keys(state.channels);
+  if (!ids.length) return;
+
+  const btn = document.getElementById("refreshBtn");
+  btn.disabled = true;
+  btn.textContent = "↻ Refreshing...";
+  let done = 0;
+
+  for (const channelId of ids) {
+    done++;
+    showStatus(`Refreshing ${done}/${ids.length}: ${state.channels[channelId]?.title || channelId}`, "info");
+    try {
+      await snapshotChannel(channelId);
+    } catch(e) {
+      console.error(`Error refreshing ${channelId}:`, e);
+    }
+    await new Promise(r => setTimeout(r, 250));
+  }
+
+  // Clean up old snapshots (keep last 35 days to save storage)
+  const cutoff = Date.now() - (35 * 24 * 60 * 60 * 1000);
+  state.snapshots = state.snapshots.filter(s => s.timestamp > cutoff);
+
+  persist();
+  render();
+  btn.disabled = false;
+  btn.textContent = "↻ Refresh All";
+  showStatus(`Refreshed ${done} channels — new snapshot created`, "info");
+  setTimeout(hideStatus, 3000);
+}
+
+// ── Compute leaderboard ─────────────────────────────
+function computeLeaderboard() {
+  const now = Date.now();
+  const periodMs = timePeriodHours * 60 * 60 * 1000;
+  const cutoffTime = now - periodMs;
+
+  const entries = [];
+
+  for (const [channelId, channel] of Object.entries(state.channels)) {
+    const channelSnaps = state.snapshots.filter(s => s.channelId === channelId);
+    if (!channelSnaps.length) {
+      entries.push({ channelId, name: channel.title, thumbnail: channel.thumbnail,
+        periodViews: 0, totalViews: 0, videoCount: 0, hasHistory: false, snapshotCount: 0 });
+      continue;
+    }
+
+    // Get unique snapshot timestamps for this channel
+    const timestamps = [...new Set(channelSnaps.map(s => s.timestamp))].sort();
+    const latestTs = timestamps[timestamps.length - 1];
+
+    // Find the best baseline timestamp: closest to cutoff time but before it
+    // If no snapshot exists before cutoff, use the earliest snapshot
+    let baselineTs = null;
+    for (const ts of timestamps) {
+      if (ts <= cutoffTime) baselineTs = ts;
+    }
+
+    // Get latest snapshot data (per video)
+    const latestData = {};
+    for (const s of channelSnaps) {
+      if (s.timestamp === latestTs) {
+        latestData[s.videoId] = s.viewCount;
+      }
+    }
+
+    // Get baseline snapshot data (per video)
+    const baselineData = {};
+    if (baselineTs) {
+      for (const s of channelSnaps) {
+        if (s.timestamp === baselineTs) {
+          baselineData[s.videoId] = s.viewCount;
+        }
+      }
+    }
+
+    let totalViews = 0;
+    let periodViews = 0;
+    const videoIds = new Set();
+
+    for (const [videoId, views] of Object.entries(latestData)) {
+      videoIds.add(videoId);
+      totalViews += views;
+
+      if (baselineTs) {
+        // We have a baseline before the cutoff — compute real delta
+        const baseViews = baselineData[videoId] || 0;
+        periodViews += (views - baseViews);
+      } else {
+        // No baseline before cutoff — all snapshots are within the period
+        // Use earliest snapshot for this video as baseline
+        let earliestViews = views;
+        for (const s of channelSnaps) {
+          if (s.videoId === videoId && s.timestamp === timestamps[0]) {
+            earliestViews = s.viewCount;
+          }
+        }
+        periodViews += (views - earliestViews);
+      }
+    }
+
+    const hasHistory = baselineTs !== null || timestamps.length > 1;
+
+    entries.push({
+      channelId,
+      name: channel.title,
+      thumbnail: channel.thumbnail,
+      periodViews,
+      totalViews,
+      videoCount: videoIds.size,
+      hasHistory,
+      snapshotCount: timestamps.length,
+    });
+  }
+
+  entries.sort((a,b) => b.periodViews - a.periodViews);
+  return entries;
+}
+
+// ── Get snapshot stats ──────────────────────────────
+function getSnapshotStats() {
+  if (!state.snapshots.length) return null;
+  const timestamps = [...new Set(state.snapshots.map(s => s.timestamp))].sort();
+  const oldest = timestamps[0];
+  const newest = timestamps[timestamps.length - 1];
+  const totalDays = Math.ceil((newest - oldest) / (24*60*60*1000));
+  return {
+    count: timestamps.length,
+    oldest,
+    newest,
+    totalDays,
+  };
+}
+
+// ── Render ───────────────────────────────────────────
+function render() {
+  const channelCount = Object.keys(state.channels).length;
+  const stats = getSnapshotStats();
+
+  // Subtitle
+  let subText = `${channelCount} channel${channelCount!==1?"s":""} tracked`;
+  if (stats) subText += ` · Last refresh: ${timeAgo(stats.newest)}`;
+  document.getElementById("subtitle").textContent = subText;
+  document.getElementById("refreshBtn").disabled = channelCount === 0;
+
+  // Period label
+  const periodLabel = timePeriodHours === 24 ? "24h" :
+    timePeriodHours === 168 ? "7d" :
+    timePeriodHours === 336 ? "14d" : "28d";
+
+  // Data note
+  const noteEl = document.getElementById("dataNote");
+  if (channelCount > 0 && stats) {
+    const periodDays = timePeriodHours / 24;
+    if (stats.totalDays < periodDays && stats.count < 2) {
+      noteEl.innerHTML = `<div class="data-note">
+        <strong>First snapshot taken.</strong> Refresh again later today or tomorrow to start seeing ${periodLabel} deltas.
+        Each refresh creates a new snapshot — the difference between snapshots = views gained.
+      </div>`;
+    } else if (stats.totalDays < periodDays) {
+      noteEl.innerHTML = `<div class="data-note">
+        ${stats.count} snapshots over ${stats.totalDays}d of history.
+        Full ${periodLabel} accuracy needs ${Math.ceil(periodDays)}+ days of snapshots.
+      </div>`;
+    } else {
+      noteEl.innerHTML = `<div class="data-note">
+        ${stats.count} snapshots over ${stats.totalDays}d — ${periodLabel} data is accurate.
+      </div>`;
+    }
+  } else {
+    noteEl.innerHTML = "";
+  }
+
+  const container = document.getElementById("leaderboard");
+
+  if (!channelCount) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📊</div>
+        <div class="empty-title">No channels tracked yet</div>
+        <div class="empty-hint">${!apiKey
+          ? 'Start by adding your YouTube API key (⚙ icon), then paste competitor channel URLs.'
+          : 'Paste a YouTube channel URL or @handle above to start tracking.'}</div>
+      </div>`;
+    document.getElementById("snapshotInfo").textContent = "";
+    return;
+  }
+
+  const entries = computeLeaderboard();
+  const maxViews = entries[0]?.periodViews || 1;
+
+  let html = `
+    <div class="col-headers">
+      <span>#</span>
+      <span>Channel</span>
+      <span class="col-stat">Shorts</span>
+      <span class="col-views">Views (${periodLabel})</span>
+      <span></span>
+    </div>`;
+
+  entries.forEach((e, i) => {
+    const rank = i + 1;
+    const barW = maxViews > 0 ? Math.max(2, (e.periodViews / maxViews) * 100) : 0;
+    const barOp = rank <= 3 ? 0.15 : 0.07;
+
+    let rankHtml;
+    if (rank === 1) rankHtml = '<span class="rank-badge gold">1</span>';
+    else if (rank === 2) rankHtml = '<span class="rank-badge silver">2</span>';
+    else if (rank === 3) rankHtml = '<span class="rank-badge bronze">3</span>';
+    else rankHtml = `<span class="rank-num">${rank}</span>`;
+
+    const viewColor = rank === 1 ? "var(--gold)" : rank === 2 ? "var(--silver)" : rank === 3 ? "var(--bronze)" : "var(--text)";
+
+    const avatarHtml = e.thumbnail
+      ? `<img class="avatar" src="${e.thumbnail}" alt="">`
+      : `<div class="avatar-placeholder">${(e.name||"?")[0].toUpperCase()}</div>`;
+
+    const deltaLabel = e.hasHistory
+      ? `<span class="views-delta">${formatViews(e.totalViews)} total</span>`
+      : `<span class="views-delta" style="color:var(--accent-light)">needs 2nd snapshot</span>`;
+
+    html += `
+      <div class="row" style="animation-delay:${i*0.04}s">
+        <div class="row-bar" style="width:${barW}%;opacity:${barOp}"></div>
+        <div class="rank-col">${rankHtml}</div>
+        <div class="channel-col">
+          ${avatarHtml}
+          <span class="channel-name">${escHtml(e.name)}</span>
+        </div>
+        <div class="stat-col">${e.videoCount}</div>
+        <div class="views-col">
+          <span class="views-num" style="color:${viewColor}">${e.periodViews > 0 ? formatViews(e.periodViews) : (e.hasHistory ? "0" : "—")}</span>
+          ${deltaLabel}
+        </div>
+        <div class="action-col">
+          <button class="remove-btn" onclick="removeChannel('${e.channelId}')" title="Remove">×</button>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Snapshot info
+  if (stats) {
+    document.getElementById("snapshotInfo").textContent =
+      `${stats.count} snapshot${stats.count!==1?"s":""} · ${stats.totalDays}d of history · refreshing adds a new snapshot`;
+  }
+}
+
+function escHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
